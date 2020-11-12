@@ -1,0 +1,161 @@
+---
+- hosts: all
+  vars:
+    db_user: k3s
+    db_pswd: 56jb1NX6Ns
+    db_name: k3sdb
+    remote_user: '{{ lookup("env", "USER") }}'
+    custom_domains:
+      - k8s.local
+      - nginx.local
+      - tutum.local
+      - extra.local
+  gather_facts: no
+  tasks:
+  - name: update software
+    become: yes
+    apt:
+      update_cache: yes
+      upgrade: 'yes'
+    when: lookup("env", "UPGRADE") == "yes"
+
+  - name: install tools
+    become: yes
+    apt:
+      name:
+        - vim
+        - sudo
+        - mysql-server
+        - python3-pymysql
+
+  - name: add user {{ remote_user }}
+    become: yes
+    user:
+      name: '{{ remote_user }}'
+      shell: /bin/bash
+
+  - name: add authorized key for {{ remote_user }}
+    become: yes
+    authorized_key:
+      user: '{{ remote_user }}'
+      state: present
+      key: '{{ lookup("file", lookup("env", "HOME") + "/.ssh/id_rsa.pub") }}'
+
+  - name: enable sudo for {{ remote_user }}
+    become: yes
+    copy:
+      content: '{{ remote_user }} ALL=(ALL) NOPASSWD:ALL'
+      dest: /etc/sudoers.d/01_{{ remote_user }}
+      mode: 0440
+      validate: /usr/sbin/visudo -csf %s
+
+  - name: mysql - configure
+    become: yes
+    copy: # "o" at begining of "o_custom.cnf" is chosed to be alfabeticaly after mysqld.cnf, only than 'bind-address' can be overwriten
+      dest: /etc/mysql/mysql.conf.d/o_custom.cnf
+      content: |
+        [mysqld]
+        character-set-server=utf8
+        collation-server=utf8_bin
+        bind-address=0.0.0.0
+
+        lower_case_table_names=1
+        default-storage-engine=InnoDB
+    register: mysql_config
+  - name: mysql - start/restart
+    become: yes
+    service:
+      name: mysql
+      state: '{{"restarted" if mysql_config.changed else "started"}}'
+  - name: init mysql - create db_user {{db_user}}
+    become: yes
+    vars:
+      ansible_python_interpreter: /usr/bin/python3
+    mysql_user:
+      name: '{{db_user}}'
+      host: '%'
+      password: '{{db_pswd}}'
+      priv: '{{db_name}}.*:ALL'
+      login_unix_socket: /var/run/mysqld/mysqld.sock
+  - name: init mysql - prepare ~/.my.cnf
+    become: yes
+    become_user: '{{remote_user}}'
+    copy:
+      dest: ~/.my.cnf
+      content: |
+        [client]
+        user={{db_user}}
+        password={{db_pswd}}
+        default-character-set=utf8
+        [mysql]
+        database={{db_name}}
+      mode: '0600'
+  - name: init mysql - create database {{db_name}}
+    vars:
+      ansible_python_interpreter: /usr/bin/python3
+    become: yes
+    become_user: '{{remote_user}}'
+    mysql_db:
+      name: '{{db_name}}'
+      encoding: utf8
+
+
+  - name: check if k3s is installed
+    stat:
+      path: /usr/local/bin/k3s
+    register: k3s_bin
+  - name: debug info
+    debug:
+      msg: curl -sfL https://get.k3s.io | sh -s - server --datastore-endpoint="mysql://{{db_user}}:{{db_pswd}}@tcp({{inventory_hostname}}:3306)/{{db_name}}" --disable=traefik
+  - name: install k3s
+    become: yes
+    shell: curl -sfL https://get.k3s.io | sh -s - server --datastore-endpoint="mysql://{{db_user}}:{{db_pswd}}@tcp({{inventory_hostname}}:3306)/{{db_name}}"
+    when: not k3s_bin.stat.exists
+
+  - name: fix servername in k3s.yaml and enable access for all users
+    become: yes
+    lineinfile:
+      path: /etc/rancher/k3s/k3s.yaml
+      line: '\1{{inventory_hostname}}\2'
+      regexp: '^(\s+server: https://).*(:\d+)$'
+      backrefs: yes
+      mode: +r
+  - name: ensure that service k3s is running
+    service:
+      name: k3s
+      state: started
+
+  - name: get host-only interface ip
+    shell: ip addr show eth1 | awk '$1=="inet" {sub(/\/.*$/,"",$2);print $2}'
+    register: host_ip
+    changed_when: no
+
+  - name: map domains to ip in /etc/hosts
+    delegate_to: localhost
+    block:
+    - name: map domains to ip in /etc/hosts
+      become: true
+      lineinfile:
+        path: /etc/hosts
+        line: '{{host_ip.stdout}} {{inventory_hostname}} {{custom_domains | join(" ")}} # k3s:{{inventory_hostname}}'
+        regexp: ' # k3s:{{inventory_hostname}}$'
+    rescue:
+    - name: ask to add maping domains to ip into /etc/hosts
+      debug:
+        msg:
+          - '# Please add or update next records in /etc/hosts'
+          - '{{host_ip.stdout}} {{inventory_hostname}} {{custom_domains | join(" ")}} # k3s:{{inventory_hostname}}'
+      changed_when: yes
+
+  - name: fetch k3s.yaml
+    fetch:
+      src: /etc/rancher/k3s/k3s.yaml
+      dest: '{{lookup("env", "PWD")}}/k3s.yaml'
+      flat: yes
+  - name: debug info
+    debug:
+      msg: export KUBECONFIG='{{lookup("env", "PWD")}}/k3s.yaml'
+
+
+
+

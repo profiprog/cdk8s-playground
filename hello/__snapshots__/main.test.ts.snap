@@ -1,0 +1,86 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Placeholder Empty 1`] = `
+Array [
+  Object {
+    "apiVersion": "networking.k8s.io/v1beta1",
+    "kind": "Ingress",
+    "metadata": Object {
+      "name": "test-chart-app-025556c3",
+    },
+    "spec": Object {
+      "rules": Array [
+        Object {
+          "host": "test.local",
+          "http": Object {
+            "paths": Array [
+              Object {
+                "backend": Object {
+                  "serviceName": "service-fjdasf",
+                  "servicePort": 8099,
+                },
+                "path": "/",
+              },
+            ],
+          },
+        },
+      ],
+    },
+  },
+  Object {
+    "apiVersion": "v1",
+    "kind": "Service",
+    "metadata": Object {
+      "name": "service-fjdasf",
+    },
+    "spec": Object {
+      "ports": Array [
+        Object {
+          "port": 8099,
+          "protocol": "TCP",
+          "targetPort": 80,
+        },
+      ],
+      "selector": Object {
+        "app": "hello-ckd8s",
+      },
+      "type": "LoadBalancer",
+    },
+  },
+  Object {
+    "apiVersion": "apps/v1",
+    "kind": "Deployment",
+    "metadata": Object {
+      "name": "test-chart-deployment-a0c86b87",
+    },
+    "spec": Object {
+      "replicas": 2,
+      "selector": Object {
+        "matchLabels": Object {
+          "app": "hello-ckd8s",
+        },
+      },
+      "template": Object {
+        "metadata": Object {
+          "labels": Object {
+            "app": "hello-ckd8s",
+          },
+        },
+        "spec": Object {
+          "containers": Array [
+            Object {
+              "image": "nginxdemos/hello",
+              "name": "hello-kubernetes",
+              "ports": Array [
+                Object {
+                  "containerPort": 80,
+                },
+              ],
+            },
+          ],
+        },
+      },
+    },
+  },
+]
+`;

@@ -1,0 +1,84 @@
+Initializing a project from the typescript-app template
+npm notice created a lockfile as package-lock.json. You should commit this file.
++ cdk8s@0.33.0
++ cdk8s-plus@0.33.0
++ constructs@3.2.17
+added 11 packages from 9 contributors and audited 11 packages in 2.49s
+
+1 package is looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+npm WARN deprecated urix@0.1.0: Please see https://github.com/lydell/urix#deprecated
+npm WARN deprecated resolve-url@0.2.1: https://github.com/lydell/resolve-url#deprecated
+npm WARN deprecated request-promise-native@1.0.9: request-promise-native has been deprecated because it extends the now deprecated request package, see https://github.com/request/request/issues/3142
+npm WARN deprecated request@2.88.2: request has been deprecated, see https://github.com/request/request/issues/3142
+npm WARN deprecated har-validator@5.1.5: this library is no longer supported
++ jest@26.6.3
++ @types/jest@26.0.15
++ ts-jest@26.4.4
++ cdk8s-cli@0.33.0
++ @types/node@14.14.6
++ typescript@4.0.5
+added 641 packages from 441 contributors and audited 653 packages in 47.338s
+
+57 packages are looking for funding
+  run `npm fund` for details
+
+found 0 vulnerabilities
+
+
+> cdk8s-typescript-example@1.0.0 import /Users/milan/Work/kubernetes/cdk8s/cdk8s-typescript-example
+> cdk8s import
+
+k8s
+
+> cdk8s-typescript-example@1.0.0 compile /Users/milan/Work/kubernetes/cdk8s/cdk8s-typescript-example
+> tsc
+
+
+> cdk8s-typescript-example@1.0.0 test /Users/milan/Work/kubernetes/cdk8s/cdk8s-typescript-example
+> jest "-u"
+
+ PASS  ./main.test.ts
+  Placeholder
+    ✓ Empty (3 ms)
+
+ › 1 snapshot written.
+Snapshot Summary
+ › 1 snapshot written from 1 test suite.
+
+Test Suites: 1 passed, 1 total
+Tests:       1 passed, 1 total
+Snapshots:   1 written, 1 total
+Time:        3.14 s
+Ran all test suites.
+
+> cdk8s-typescript-example@1.0.0 synth /Users/milan/Work/kubernetes/cdk8s/cdk8s-typescript-example
+> cdk8s synth
+
+dist/cdk8s-typescript-example.k8s.yaml
+========================================================================================================
+
+ Your cdk8s typescript project is ready!
+
+   cat help         Print this message
+
+  Compile:
+   npm run compile     Compile typescript code to javascript (or "yarn watch")
+   npm run watch       Watch for changes and compile typescript in the background
+   npm run build       Compile + synth
+
+  Synthesize:
+   npm run synth       Synthesize k8s manifests from charts to dist/ (ready for 'kubectl apply -f')
+
+ Deploy:
+   kubectl apply -f dist/*.k8s.yaml
+
+ Upgrades:
+   npm run import        Import/update k8s apis (you should check-in this directory)
+   npm run upgrade       Upgrade cdk8s modules to latest version
+   npm run upgrade:next  Upgrade cdk8s modules to latest "@next" version (last commit)
+
+========================================================================================================
