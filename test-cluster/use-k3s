@@ -9,6 +9,6 @@ fi
 CONFIG="$(dirname "$BASH_SOURCE")/k3s.yaml"
 [ -f "$CONFIG" ] || (echo "\x1b[31mError:\x1b[0m config file '$CONFIG' not found! (suggest to run: $(dirname "$BASH_SOURCE")$ vagrant up --provision)" >&2 && exit 1)
 FULLPATH_CONFIG="$(realpath "$CONFIG")"
-echo "\x1b[33m$CONFIG\x1b[0m -> \x1b[33m$FULLPATH_CONFIG\x1b[0m"
-echo '\x1b[37mexport \x1b[34mKUBECONFIG\x1b[0m=\x1b[32m"'"$FULLPATH_CONFIG"'"\x1b[0m'
+echo -e "\x1b[33m$CONFIG\x1b[0m -> \x1b[33m$FULLPATH_CONFIG\x1b[0m"
+echo -e '\x1b[37mexport \x1b[34mKUBECONFIG\x1b[0m=\x1b[32m"'"$FULLPATH_CONFIG"'"\x1b[0m'
 export KUBECONFIG="$FULLPATH_CONFIG"

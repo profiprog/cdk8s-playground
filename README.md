@@ -1,4 +1,4 @@
-# Playing with [CDK8S.io](CDK8S.io)
+# Playing with [CDK8S](https://cdk8s.io/)
 Shared code used for demo in presetation [CDK for Kubernetes](https://slides.com/profiprog/cdk8s)
 
 ## Content explanation

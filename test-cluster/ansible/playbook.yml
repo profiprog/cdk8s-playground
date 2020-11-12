@@ -4,7 +4,7 @@
     db_user: k3s
     db_pswd: 56jb1NX6Ns
     db_name: k3sdb
-    remote_user: '{{ lookup("env", "USER") }}'
+    vm_user: '{{ lookup("env", "USER") }}'
     custom_domains:
       - k8s.local
       - nginx.local
@@ -28,24 +28,24 @@
         - mysql-server
         - python3-pymysql
 
-  - name: add user {{ remote_user }}
+  - name: add user {{ vm_user }}
     become: yes
     user:
-      name: '{{ remote_user }}'
+      name: '{{ vm_user }}'
       shell: /bin/bash
 
-  - name: add authorized key for {{ remote_user }}
+  - name: add authorized key for {{ vm_user }}
     become: yes
     authorized_key:
-      user: '{{ remote_user }}'
+      user: '{{ vm_user }}'
       state: present
       key: '{{ lookup("file", lookup("env", "HOME") + "/.ssh/id_rsa.pub") }}'
 
-  - name: enable sudo for {{ remote_user }}
+  - name: enable sudo for {{ vm_user }}
     become: yes
     copy:
-      content: '{{ remote_user }} ALL=(ALL) NOPASSWD:ALL'
-      dest: /etc/sudoers.d/01_{{ remote_user }}
+      content: '{{ vm_user }} ALL=(ALL) NOPASSWD:ALL'
+      dest: /etc/sudoers.d/01_{{ vm_user }}
       mode: 0440
       validate: /usr/sbin/visudo -csf %s
 
@@ -79,7 +79,7 @@
       login_unix_socket: /var/run/mysqld/mysqld.sock
   - name: init mysql - prepare ~/.my.cnf
     become: yes
-    become_user: '{{remote_user}}'
+    become_user: '{{vm_user}}'
     copy:
       dest: ~/.my.cnf
       content: |
@@ -94,7 +94,7 @@
     vars:
       ansible_python_interpreter: /usr/bin/python3
     become: yes
-    become_user: '{{remote_user}}'
+    become_user: '{{vm_user}}'
     mysql_db:
       name: '{{db_name}}'
       encoding: utf8
