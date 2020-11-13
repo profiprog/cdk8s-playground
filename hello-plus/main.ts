@@ -24,7 +24,7 @@ export class SimpleWebAppChart extends Chart {
     const service = new Service(this, 'service', {
       metadata,
       type: ServiceType.LOAD_BALANCER,
-      ports: [{port: opts.servicePort, targetPort: opts.cotnainerPort, protocol: Protocol.TCP }],
+      ports: [{port: opts.servicePort, targetPort: opts.cotnainerPort || 80, protocol: Protocol.TCP }],
     });
     service.addSelector('app', `web-${name}`);
 
@@ -46,7 +46,7 @@ export class SimpleWebAppChart extends Chart {
           image: opts.appImage,
           imagePullPolicy: ImagePullPolicy.IF_NOT_PRESENT,
           name: name,
-          port: opts.cotnainerPort,
+          port: opts.cotnainerPort || 80,
         }),
       ],
     });
